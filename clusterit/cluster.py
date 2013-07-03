@@ -2,6 +2,8 @@ from json import loads
 
 from geojson.codec import dumps
 
+from . import sql
+
 
 class Cluster(object):
     def __init__(self, feature, threshold=1, use_centroid=False,
@@ -80,6 +82,21 @@ class Cluster(object):
             'properties': properties
         }
 
+
+def get_clusters(id, config, bbox):
+    if config['type'].lower() == 'sql':
+        features = sql.get_features(id, config, bbox)
+    else:
+        features = []
+
+    return cluster_features(
+        features,
+        threshold=config.get('threshold', 1),
+        use_centroid=config.get('use_centroid'),
+        aggregation=config.get('aggregation'),
+        aggregation_split=config.get('aggregation_split'),
+        aggregation_backref=config.get('aggregation_backref'),
+        include_features=config.get('include_features'))
 
 
 def cluster_features(features, threshold, use_centroid=False,
