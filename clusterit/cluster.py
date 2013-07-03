@@ -1,7 +1,19 @@
+from json import loads
+
+from geojson.codec import dumps
+
+
 class Cluster(object):
-    def __init__(self, feature, threshold):
+    def __init__(self, feature, threshold=1, use_centroid=False,
+                 aggregation=False, aggregation_split=None,
+                 aggregation_backref=None, include_features=False):
         self.features = [feature]
         self.threshold = threshold
+        self.use_centroid = use_centroid
+        self.aggregation = aggregation
+        self.aggregation_split = aggregation_split
+        self.aggregation_backref = aggregation_backref
+        self.include_features = include_features
 
     def add(self, feature):
         if self.features[0].geometry.distance(feature.geometry) <= self.threshold:
@@ -9,8 +21,70 @@ class Cluster(object):
             return True
         return False
 
+    def geoJSON(self):
+        geometry = self.features[0].geometry.centroid
+        if self.use_centroid:
+            for feature in self.features[1:]:
+                geometry = geometry.union(feature.geometry)
+            geometry = geometry.centroid
 
-def cluster_features(features, threshold):
+        properties = {
+            'count': len(self.features)
+        }
+
+        if self.aggregation:
+            properties['aggregation'] = {}
+            for feature in self.features:
+                key = feature.properties.get(self.aggregation)
+                if isinstance(key, list):
+                    keys = key
+                    if self.aggregation_split:
+                        keys = [key.split(self.aggregation_split) for key in keys]
+                else:
+                    if key and self.aggregation_split:
+                        keys = key.split(self.aggregation_split)
+                    else:
+                        keys = [key]
+
+                for key in keys:
+                    if key in properties['aggregation']:
+                        pass
+                        if self.aggregation_backref:
+                            if self.include_features:
+                                backref = feature.geoJSON()
+                            else:
+                                backref = feature.properties.get(self.aggregation_backref)
+                            properties['aggregation'][key]['count'] += 1
+                            properties['aggregation'][key]['backrefs'].append(backref)
+                        else:
+                            properties['aggregation'][key] += 1
+                    else:
+                        if self.aggregation_backref:
+                            if self.include_features:
+                                backref = feature.geoJSON()
+                            else:
+                                backref = feature.properties.get(self.aggregation_backref)
+                            properties['aggregation'][key] = {
+                                'count': 1,
+                                'backrefs': [backref]
+                            }
+                        else:
+                            properties['aggregation'][key] = 1
+
+        if self.include_features and not (self.aggregation and self.aggregation_backref):
+                properties['features'] = [f.geoJSON() for f in self.features]
+
+        return {
+            'type': 'Feature',
+            'geometry': loads(dumps(geometry)),
+            'properties': properties
+        }
+
+
+
+def cluster_features(features, threshold, use_centroid=False,
+                     aggregation=False, aggregation_split=None,
+                     aggregation_backref=None, include_features=False):
     clusters = []
     for feature in features:
         clustered = False
@@ -19,6 +93,8 @@ def cluster_features(features, threshold):
                 clustered = True
                 break
         if not clustered:
-            clusters.append(Cluster(feature, threshold))
+            clusters.append(Cluster(
+                feature, threshold, use_centroid, aggregation,
+                aggregation_split, aggregation_backref, include_features))
 
     return clusters
