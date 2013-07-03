@@ -6,11 +6,12 @@ from . import sql
 
 
 class Cluster(object):
-    def __init__(self, feature, threshold=1, use_centroid=False,
+    def __init__(self, feature, threshold=1, resolution=1, use_centroid=False,
                  aggregation=False, aggregation_split=None,
                  aggregation_backref=None, include_features=False):
         self.features = [feature]
         self.threshold = threshold
+        self.resolution = resolution
         self.use_centroid = use_centroid
         self.aggregation = aggregation
         self.aggregation_split = aggregation_split
@@ -18,7 +19,7 @@ class Cluster(object):
         self.include_features = include_features
 
     def add(self, feature):
-        if self.features[0].geometry.distance(feature.geometry) <= self.threshold:
+        if self.features[0].geometry.distance(feature.geometry) / self.resolution <= self.threshold:
             self.features.append(feature)
             return True
         return False
@@ -83,7 +84,7 @@ class Cluster(object):
         }
 
 
-def get_clusters(id, config, bbox):
+def get_clusters(id, config, bbox, resolution):
     if config['type'].lower() == 'sql':
         features = sql.get_features(id, config, bbox)
     else:
@@ -92,6 +93,7 @@ def get_clusters(id, config, bbox):
     return cluster_features(
         features,
         threshold=config.get('threshold', 1),
+        resolution=resolution,
         use_centroid=config.get('use_centroid'),
         aggregation=config.get('aggregation'),
         aggregation_split=config.get('aggregation_split'),
@@ -99,7 +101,7 @@ def get_clusters(id, config, bbox):
         include_features=config.get('include_features'))
 
 
-def cluster_features(features, threshold, use_centroid=False,
+def cluster_features(features, threshold, resolution=1, use_centroid=False,
                      aggregation=False, aggregation_split=None,
                      aggregation_backref=None, include_features=False):
     clusters = []
@@ -111,7 +113,7 @@ def cluster_features(features, threshold, use_centroid=False,
                 break
         if not clustered:
             clusters.append(Cluster(
-                feature, threshold, use_centroid, aggregation,
+                feature, threshold, resolution, use_centroid, aggregation,
                 aggregation_split, aggregation_backref, include_features))
 
     return clusters
