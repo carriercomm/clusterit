@@ -8,7 +8,10 @@ from cluster import get_clusters
 
 app = Flask(__name__)
 
-app.config.from_object(os.environ.get('CLUSTERIT_SETTINGS_MODULE'))
+settings_module = os.environ.get('CLUSTERIT_SETTINGS_MODULE')
+app.config.from_object(settings_module)
+
+app.logger.info('Using settings module "%s"' % settings_module)
 
 app.extensions['clusterit'] = {
     'sql': {}
