@@ -1,11 +1,13 @@
 import decimal
+from urlparse import parse_qs, urlparse
 
-from flask import current_app
-from geoalchemy2 import Geometry
+from flask import current_app, request
 from geoalchemy2.elements import WKTElement
 from geoalchemy2.shape import to_shape
 from shapely.geometry import box
-from sqlalchemy import create_engine, MetaData, Table
+from sqlalchemy import create_engine, MetaData, Table, cast, String
+from sqlalchemy.dialects.postgresql import array, VARCHAR
+from sqlalchemy.sql import and_
 from sqlalchemy.sql.expression import func, select
 
 from feature import Feature
@@ -51,6 +53,7 @@ def get_features(id, config, bbox):
     srs = config.get('srs', 4326)
     bbox = WKTElement(box(*bbox).wkt, srs)
 
+    # Get SELECT columns
     column_names = config.get('columns', [])
     for c in ['aggregation', 'aggregation_backref']:
         if config.get(c) and config[c] not in column_names:
@@ -62,8 +65,31 @@ def get_features(id, config, bbox):
         the_geom = func.ST_Transform(the_geom, srs).label(the_geom.name)
     columns.append(the_geom)
 
-    query = select(columns).where(func.ST_Centroid(the_geom).contained(bbox))
+    # Get Spatial WHERE
+    spatial_filter = func.ST_Centroid(the_geom).contained(bbox)
 
+    # Get Properties filter
+    property_filter = []
+    for k, v in parse_qs(urlparse(request.url).query, True).items():
+        if k == 'resolution' or k == 'bbox':
+            continue
+        if k in config.get('filter', {}):
+            operand = config['filter'][k]['operand']
+            operator = config['filter'][k]['operator']
+
+            column = getattr(connection['table'].c, operand)
+            value = cast(v, column.type)
+            property_filter.append(getattr(column, operator)(value))
+
+    # Get Final Query
+    if len(property_filter) == 1:
+        query = select(columns).where(and_(spatial_filter, property_filter[0]))
+    elif len(property_filter) > 1:
+        query = select(columns).where(and_(spatial_filter, and_(*property_filter)))
+    else:
+        query = select(columns).where(spatial_filter)
+
+    # Collect Features from query
     features = []
     for row in connection['engine'].connect().execute(query):
         properties = {}
