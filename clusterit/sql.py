@@ -56,10 +56,13 @@ def get_features(id, config, bbox):
     # Get SELECT columns
     column_names = config.get('columns', [])
     for c in ['aggregation', 'aggregation_backref']:
-        if config.get(c) and config[c] not in column_names:
-            column_names.append(config[c])
-    columns = [getattr(connection['table'].c, c) for c in column_names]
+        if config.get(c):
+            columns = config[c] if isinstance(config[c], list) else [config[c]]
+            for c1 in columns:
+                if c1 not in column_names:
+                    column_names.append(c1)
 
+    columns = [getattr(connection['table'].c, c) for c in column_names]
     the_geom = getattr(connection['table'].c, config['geometryName'])
     if the_geom.type.srid != srs:
         the_geom = func.ST_Transform(the_geom, srs).label(the_geom.name)
