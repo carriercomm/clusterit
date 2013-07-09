@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html>
+
+  <head>
+    <meta charset='utf-8' />
+    <meta http-equiv="X-UA-Compatible" content="chrome=1" />
+    <meta name="description" content="Clusterit : Configurable clustering feature proxy for PostGIS" />
+
+    <link rel="stylesheet" type="text/css" media="screen" href="stylesheets/stylesheet.css">
+
+    <title>Clusterit</title>
+  </head>
+
+  <body>
+
+    <!-- HEADER -->
+    <div id="header_wrap" class="outer">
+        <header class="inner">
+          <a id="forkme_banner" href="https://github.com/arsgeografica/clusterit">View on GitHub</a>
+
+          <h1 id="project_title">Clusterit</h1>
+          <h2 id="project_tagline">Configurable clustering feature proxy for PostGIS</h2>
+
+            <section id="downloads">
+              <a class="zip_download_link" href="https://github.com/arsgeografica/clusterit/zipball/master">Download this project as a .zip file</a>
+              <a class="tar_download_link" href="https://github.com/arsgeografica/clusterit/tarball/master">Download this project as a tar.gz file</a>
+            </section>
+        </header>
+    </div>
+
+    <!-- MAIN CONTENT -->
+    <div id="main_content_wrap" class="outer">
+      <section id="main_content" class="inner">
+        <h1>
+<a name="welcome-to-clusterit" class="anchor" href="#welcome-to-clusterit"><span class="octicon octicon-link"></span></a>Welcome to ClusterIt</h1>
+
+<p>This Python web app can be used to provide spatially clustered features encoded in GeoJSON format,
+ready for consumption in OpenLayers or Leaflet for example.</p>
+
+<h2>
+<a name="installation" class="anchor" href="#installation"><span class="octicon octicon-link"></span></a>Installation</h2>
+
+<p>If you want to use the app, the easiest way is to use a python virtualenv, I recommend using 
+virtualenvwrapper as it makes working with virtualenvs just so much easier:</p>
+
+<pre><code>$ mkvirtualenv clusterit
+$ mkdir myclusterit
+$ pip install clusterit
+$ cd myclusterit
+$ wget http://geospatial.io/clusterit/files/settings.py
+</code></pre>
+
+<p>Go ahead and make changes to the settings module to reflect your database.</p>
+
+<pre><code>$ export CLUSTERIT_SETTINGS_MODULE=settings
+$ clusterit.py
+</code></pre>
+
+<p>Now head over to your browser and open http://localhost:5000 to get a overview page.</p>
+      </section>
+    </div>
+
+    <!-- FOOTER  -->
+    <div id="footer_wrap" class="outer">
+      <footer class="inner">
+        <p class="copyright">Clusterit maintained by <a href="https://github.com/arsgeografica">arsgeografica</a></p>
+        <p>Published with <a href="http://pages.github.com">GitHub Pages</a></p>
+      </footer>
+    </div>
+
+    
+
+  </body>
+</html>
