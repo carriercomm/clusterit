@@ -9,6 +9,7 @@ SERVICES = {
         'type':                 'sql',
         'host':                  None,
         'user':                 'postgres' if TRAVIS else None,
+        'password':              None,
         'database':             'test_clusterit',
         'table':                'test_points',
         'geometryName':         'geom',
