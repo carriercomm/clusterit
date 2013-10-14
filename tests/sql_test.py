@@ -10,7 +10,7 @@ from sqlalchemy import create_engine, Column, Integer, MetaData, String, Table
 from sqlalchemy.engine import Engine
 from sqlalchemy.exc import OperationalError
 from clusterit.app import app
-from clusterit.sql import get_connection
+from clusterit.sql import get_connection, get_features
 
 
 class SqlTestCase(unittest.TestCase):
@@ -94,6 +94,20 @@ class SqlTestCase(unittest.TestCase):
         with app.test_request_context():
             self.assertRaises(OperationalError,  get_connection, self.config_id, false_config)
 
-# Multiple
-# Get features
+    def test_multiple_connections(self):
+        with app.test_request_context():
+            connection_1 = get_connection(self.config_id, self.config)
 
+            config_id_2 = 'written_in_a_train'
+            config_2 = copy.deepcopy(self.config)
+            connection_2 = get_connection(config_id_2, config_2)
+
+            assert app.extensions['clusterit']['sql'][self.config_id] == connection_1
+            assert app.extensions['clusterit']['sql'][config_id_2] == connection_2
+            assert connection_1 != connection_2
+
+    def test_get_features(self):
+        with app.test_request_context():
+            bbox = [-1.5, -1.5, 1.5, 1.5]
+            features = get_features(self.config_id, self.config, bbox)
+            assert len(features) == 9
