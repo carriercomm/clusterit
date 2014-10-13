@@ -24,6 +24,20 @@ class Cluster(object):
             return True
         return False
 
+    def _get_backref(self, feature):
+        if self.include_features:
+            backref = feature.geoJSON()
+        elif isinstance(self.aggregation_backref, basestring):
+            backref = feature.properties.get(self.aggregation_backref)
+        elif isinstance(self.aggregation_backref, list):
+            backref = {}
+            for attribute in self.aggregation_backref:
+                backref[attribute] = feature.properties.get(attribute)
+        else:
+            backref = None
+
+        return backref
+
     def geoJSON(self):
         geometry = self.features[0].geometry.centroid
         if self.use_centroid:
@@ -51,25 +65,16 @@ class Cluster(object):
 
                 for key in keys:
                     if key in properties['aggregation']:
-                        pass
                         if self.aggregation_backref:
-                            if self.include_features:
-                                backref = feature.geoJSON()
-                            else:
-                                backref = feature.properties.get(self.aggregation_backref)
                             properties['aggregation'][key]['count'] += 1
-                            properties['aggregation'][key]['backrefs'].append(backref)
+                            properties['aggregation'][key]['backrefs'].append(self._get_backref(feature))
                         else:
                             properties['aggregation'][key] += 1
                     else:
                         if self.aggregation_backref:
-                            if self.include_features:
-                                backref = feature.geoJSON()
-                            else:
-                                backref = feature.properties.get(self.aggregation_backref)
                             properties['aggregation'][key] = {
                                 'count': 1,
-                                'backrefs': [backref]
+                                'backrefs': [self._get_backref(feature)]
                             }
                         else:
                             properties['aggregation'][key] = 1
