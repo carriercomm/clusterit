@@ -34,6 +34,11 @@ setup(
         'psycopg2>=2.5.1',
         'shapely>=1.2.17'
     ],
+    setup_requires=[
+        'nose>=1.0',
+        'rednose>=0.4.1',
+        'coverage>=3.7.1'
+    ],
     classifiers=[
         "Development Status :: 3 - Alpha",
         "Environment :: Web Environment",

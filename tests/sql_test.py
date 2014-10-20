@@ -16,8 +16,8 @@ from clusterit.sql import get_connection, get_features
 class SqlTestCase(unittest.TestCase):
     def setUp(self):
         settings_module = os.environ.get('CLUSTERIT_SETTINGS_MODULE', 'tests.settings')
-        self.config_id = importlib.import_module(settings_module).SERVICES.items()[0][0]
-        self.config = importlib.import_module(settings_module).SERVICES.items()[0][1]
+        self.config_id = list(importlib.import_module(settings_module).SERVICES.items())[0][0]
+        self.config = list(importlib.import_module(settings_module).SERVICES.items())[0][1]
 
         features = []
         for x in range(-3, 4):
