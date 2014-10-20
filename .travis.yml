@@ -11,7 +11,7 @@ before_script:
    - psql -c 'CREATE DATABASE test_clusterit;' -U postgres
    - psql -d test_clusterit -c "CREATE EXTENSION postgis;" -U postgres
 install: 'pip install -r requirements.txt --use-mirrors'
-script: nosetests
+script: ./setup.py nosetests
 env:
     CLUSTERIT_SETTINGS_MODULE=tests.settings
 branches:
