@@ -37,7 +37,8 @@ setup(
     setup_requires=[
         'nose>=1.0',
         'rednose>=0.4.1',
-        'coverage>=3.7.1'
+        'coverage>=3.7.1',
+        'tox>=1.8.0'
     ],
     classifiers=[
         "Development Status :: 3 - Alpha",

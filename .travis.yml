@@ -1,7 +1,6 @@
 language: python
 python:
     - "2.7"
-    - "3.3"
 before_install:
     - echo "yes" | sudo apt-add-repository ppa:ubuntugis/ubuntugis-unstable
     - sudo apt-get update -qq
@@ -10,10 +9,17 @@ before_install:
 before_script:
    - psql -c 'CREATE DATABASE test_clusterit;' -U postgres
    - psql -d test_clusterit -c "CREATE EXTENSION postgis;" -U postgres
-install: ./setup.py develop
-script: ./setup.py nosetests
 env:
-    CLUSTERIT_SETTINGS_MODULE=tests.settings
+    global:
+        - CLUSTERIT_SETTINGS_MODULE=tests.settings
+    matrix:
+        - TOX_ENV=py27
+        - TOX_ENV=py33
+        - TOX_ENV=py34
+install:
+    - pip install tox
+script:
+    - tox -e $TOX_ENV
 branches:
     only:
         - master
