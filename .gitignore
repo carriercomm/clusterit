@@ -1,4 +1,8 @@
-build
+*.egg
+*.egg-info
 .coverage
+.tox
 .vagrant
-
+build
+dist
+MANIFEST

@@ -16,8 +16,8 @@ from clusterit.sql import get_connection, get_features
 class SqlTestCase(unittest.TestCase):
     def setUp(self):
         settings_module = os.environ.get('CLUSTERIT_SETTINGS_MODULE', 'tests.settings')
-        self.config_id = importlib.import_module(settings_module).SERVICES.items()[0][0]
-        self.config = importlib.import_module(settings_module).SERVICES.items()[0][1]
+        self.config_id = list(importlib.import_module(settings_module).SERVICES.items())[0][0]
+        self.config = list(importlib.import_module(settings_module).SERVICES.items())[0][1]
 
         features = []
         for x in range(-3, 4):
@@ -44,7 +44,6 @@ class SqlTestCase(unittest.TestCase):
             values[self.config['geometryName']] = from_shape(feature['geometry'], srid=4326)
             connection.execute(table.insert().values(values))
 
-
     def _get_postgis(self):
         user = ''
         if self.config.get('user'):
@@ -67,8 +66,8 @@ class SqlTestCase(unittest.TestCase):
 
     def tearDown(self):
         drop = (
-            True if os.environ.get('CLUSTERIT_TESTS_DONT_DROP', False) == '1'
-            else False)
+            False if os.environ.get('CLUSTERIT_TESTS_DONT_DROP', False) == '1'
+            else True)
         if not drop:
             return
 
@@ -92,7 +91,7 @@ class SqlTestCase(unittest.TestCase):
         false_config = copy.deepcopy(self.config)
         false_config['host'] = 'this_host_does_not_exist_hopefully'
         with app.test_request_context():
-            self.assertRaises(OperationalError,  get_connection, self.config_id, false_config)
+            self.assertRaises(OperationalError, get_connection, 'exceptional', false_config)
 
     def test_multiple_connections(self):
         with app.test_request_context():

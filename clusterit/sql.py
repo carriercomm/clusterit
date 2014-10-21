@@ -1,5 +1,8 @@
 import decimal
-from urlparse import parse_qs, urlparse
+try:
+    from urlparse import parse_qs, urlparse
+except ImportError:
+    from urllib.parse import parse_qs, urlparse
 
 from flask import current_app, request
 from geoalchemy2.elements import WKTElement
@@ -10,7 +13,7 @@ from sqlalchemy.dialects.postgresql import array, VARCHAR
 from sqlalchemy.sql import and_
 from sqlalchemy.sql.expression import func, select
 
-from feature import Feature
+from clusterit.feature import Feature
 
 
 def get_connection(id, config):

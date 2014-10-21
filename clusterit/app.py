@@ -3,7 +3,7 @@ import os
 
 from flask import abort, request, Flask
 
-from cluster import get_clusters
+from clusterit.cluster import get_clusters
 
 
 app = Flask(__name__)
